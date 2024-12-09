@@ -1,0 +1,390 @@
+﻿<html>
+
+<head>
+<title>Баннер Каждому</title>
+<meta http-equiv="MSThemeCompatible" content="yes" />
+<script type="text/javascript">
+ 
+ // const cdr = window.external.Application;
+  var CutLength = 0;
+  var Area = 0;
+  var SelectionArea = 0;
+  var width = 0;
+  var height =0;
+
+  function OnLoad()
+  {
+    window.external.Application.InitializeVBA();
+    RegisterEvent();      // tells draw to notify us when the selection changes.
+    OnSelectionChange();  // initialize the dialog
+  }
+
+  function RegisterEvent()
+  {
+    // tell coreldraw to call OnSelectionChange when the selection changes
+    window.external.RegisterEventListener( "SelectionChange", "OnSelectionChange()" );
+  }
+
+  // function UnregisterEvent()
+  // {
+  //   // if you want to stop listening for the selection change event, call this function
+  //   window.external.UnregisterEventListener( "SelectionChange" );
+  // }
+
+  function OnSelectionChange()
+  {
+    if( window.external.Application.ActiveShape != null ){
+      if( window.external.Application.ActiveSelection.Shapes.Count == 1 ){
+        if ( window.external.Application.Activeshape.Evaluate("@type") == 'curve'){
+          var select = window.external.Application.Activeshape.Curve.Length;
+          CutLength = Math.ceil(select*25.4)/1000;
+          CutLengthLabel.value = CutLength;
+          width = (window.external.Application.Activeshape.SizeWidth*25.4/1000).toFixed(2);
+          height = (window.external.Application.Activeshape.SizeHeight*25.4/1000).toFixed(2);
+          SelectionArea = (width*height).toFixed(2);
+          SelectionAreaLabel.value = SelectionArea;
+          Area = (window.external.Application.Activeshape.Curve.Area/1550.0031000062).toFixed(2);
+          AreaLabel.value = Area;
+          refresh();
+        } else { 
+          CutLengthLabel.value = '';
+          SelectionAreaLabel.value = '';
+          AreaLabel.value = '';
+        }
+      } else { 
+        CutLengthLabel.value = '';
+        SelectionAreaLabel.value = '';
+        AreaLabel.value = '';
+      }
+    }
+  }
+
+  function refresh()
+  {
+    Assembling.value = (CutLength*1.25).toFixed(2);
+    PBX3.value = (CutLength*0.09).toFixed(2);
+    PBX4.value = (Number(SelectionArea)+Number(CutLength*0.02)).toFixed(2);
+    Polistirol.value = SelectionArea;
+    Glue.value = Math.ceil(CutLength/25);
+    SHVVP.value = (width*3).toFixed(2);
+    Frame.value = width*2 + height*width*2;
+    Print.value = SelectionArea;
+    Diodes.value = Math.ceil(Area*111);
+    PowerUnit.value = Math.ceil(Area*111/135);
+    calc();
+  }
+
+  function calc()
+  {
+    AssemblingSumm.value = (AssemblingPrice.value*Assembling.value).toFixed(2);
+    AssemblingTotal.value = (AssemblingSumm.value*2).toFixed(2);
+
+    PBX3Summ.value = (PBX3Price.value*PBX3.value).toFixed(2);
+    PBX3Total.value = (PBX3Summ.value*1.5).toFixed(2);
+
+    PBX4Summ.value = (PBX4Price.value*PBX4.value).toFixed(2);
+    PBX4Total.value = (PBX4Summ.value*1.5).toFixed(2);
+
+    PolistirolSumm.value = (PolistirolPrice.value*Polistirol.value).toFixed(2);
+    PolistirolTotal.value = (PolistirolSumm.value*1.5).toFixed(2);
+
+    GlueSumm.value = (GluePrice.value*Glue.value).toFixed(2);
+    GlueTotal.value = (GlueSumm.value*1.5).toFixed(2);
+
+    SHVVPSumm.value = (SHVVPPrice.value*SHVVP.value).toFixed(2);
+    SHVVPTotal.value = (SHVVPSumm.value*1.5).toFixed(2);
+
+    FrameSumm.value = (FramePrice.value*Frame.value).toFixed(2);
+    FrameTotal.value = (FrameSumm.value*1.5).toFixed(2);
+
+    PrintSumm.value = (PrintPrice.value*Print.value).toFixed(2);
+    PrintTotal.value = (PrintSumm.value*1.5).toFixed(2);
+
+    DiodesSumm.value = (DiodesPrice.value*Diodes.value).toFixed(2);
+    DiodesTotal.value = (DiodesSumm.value*1.5).toFixed(2);
+
+    PowerUnitSumm.value = (PowerUnitPrice.value*PowerUnit.value).toFixed(2);
+    PowerUnitTotal.value = (PowerUnitSumm.value*1.5).toFixed(2);
+
+    TotalPrice.value = (Number(AssemblingSumm.value)+Number(PBX3Summ.value)+Number(PBX4Summ.value)
+        +Number(PolistirolSumm.value)+Number(GlueSumm.value)+Number(SHVVPSumm.value)+Number(FrameSumm.value)+
+        +Number(PrintSumm.value)+Number(DiodesSumm.value)+Number(PowerUnitSumm.value)).toFixed(2);
+
+    Total.value = (Number(AssemblingTotal.value)+Number(PBX3Total.value)+Number(PBX4Total.value)
+        +Number(PolistirolTotal.value)+Number(GlueTotal.value)+Number(SHVVPTotal.value)+Number(FrameTotal.value)+
+        +Number(PrintTotal.value)+Number(DiodesTotal.value)+Number(PowerUnitTotal.value)).toFixed(2);
+  }
+
+  // function SelectOfType( type )
+  // {
+  //   var query = "@type='" + type + "'";
+  //   var inGroup = window.external.Application.ActivePage.Shapes.FindShapes("", 0, true, query);
+  //   var topOnly = window.external.Application.ActivePage.Shapes.FindShapes("", 0, false, query);
+  //   topOnly.CreateSelection();  // select all of the top level objects.
+  //   window.external.Application.ActivePage.Shapes.FindShapes("", 0, false, query).CreateSelection();
+    
+  //   // selecting shapes inside and outside of a group isn't legal in CorelDRAW, so we only select the top level objects
+  //   // and show a warning if there are objects that are within groups that were not selected.
+  //   warning.style.visibility = topOnly.Count == inGroup.Count ? "hidden" : "visible";
+  // }
+
+  function exportJPG() {
+    var expOptions = new StructExportOptions;
+
+    // Dim expOptions As New StructExportOptions
+    // expOptions.AntiAliasingType = "cdrNormalAntiAliasing";
+    // expOptions.Compression = "cdrCompressionJPEG";
+    // expOptions.ImageType = "cdrRGBColorImage";
+    // expOptions.MaintainAspect = True;
+    // expOptions.ResolutionX = 300;
+    // expOptions.ResolutionY = 300;
+    // expOptions.UseColorProfile = True;
+    // var app = window.external.Application;
+    // var doc = app.ActiveDocument;
+
+
+    window.external.Application.ActiveDocument.ExportBitmap("T:\\1.jpg","cdrJPEG","cdrSelection","cdrCMYKColorImage",1000,1000,100,100,1,false,false,false,false,"cdrCompressionJPEG");
+    // ActiveDocument.Export ("1,jpg",cdrJPEG,cdrSelection,expOptions);
+  }
+</script>
+
+<style type="text/css">
+    body, table, tr, td {
+      margin: 4px;
+      font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+      font-size:11;
+      overflow-x:hidden;     
+      overflow-y:auto;
+      color: white;       
+      background:#373737;
+    }
+    input {
+      margin: 0px;
+      font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+      font-size:11;
+      
+      color: white;
+      background:#303030; 
+      border: 1px solid black;
+    }
+    #Calculation {
+      border-collapse: collapse;
+    }
+    #Calculation td {
+      border: 1px solid black;
+    }
+    #Calculation input {
+      border: none;
+    }
+</style>
+
+</head>
+
+<body topmargin="0" leftmargin="0" onload="OnLoad()">
+
+<table>
+  <tr>
+    <td>Длинна борта (м.):</td>
+    <td>
+      <input id="CutLengthLabel" style="width:100px" title="File type" value="" readonly="readonly"/>
+    </td>
+    <td rowspan="3">
+      <input type="button" style="width:100px" onclick="OnSelectionChange()" value="Расчитать" />
+      <br>
+      <input type="button" style="width:100px" onclick="exportJPG()" value="Экспорт jpg" />
+    </td>
+  </tr>
+  <tr>
+    <td>Площадь выделения(кв.м.):</td>
+    <td>
+      <input id="SelectionAreaLabel" style="width:100px" title="File type" value="" readonly="readonly"/>
+    </td>
+  </tr>
+  <tr>
+    <td>Площадь (кв.м.):</td>
+    <td>
+      <input id="AreaLabel" style="width:100px" title="File type" value="" readonly="readonly"/>
+    </td>
+  </tr>
+</table>
+
+<table id="Calculation">
+  <tr>
+    <td></td>
+    <td>Кол-во</td>
+    <td>Цена</td>
+    <td>Себ-ть</td>
+    <td>Итого</td>
+  </tr>
+  <tr>
+    <td>Сборка</td>
+    <td>
+      <input id="Assembling" style="width:50px" title="File type" value="" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="AssemblingPrice" style="width:50px" title="File type" value="375" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="AssemblingSumm" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+    <td>
+      <input id="AssemblingTotal" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+  </tr>
+  <tr>
+    <td>ПВХ 3 мм</td>
+    <td>
+      <input id="PBX3" style="width:50px" title="File type" value="" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="PBX3Price" style="width:50px" title="File type" value="1127" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="PBX3Summ" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+    <td>
+      <input id="PBX3Total" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+  </tr>
+  <tr>
+    <td>ПВХ 4 мм</td>
+    <td>
+      <input id="PBX4" style="width:50px" title="File type" value="" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="PBX4Price" style="width:50px" title="File type" value="968" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="PBX4Summ" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+    <td>
+      <input id="PBX4Total" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+  </tr>
+  <tr>
+    <td>Полистерол 3 мм</td>
+    <td>
+      <input id="Polistirol" style="width:50px" title="File type" value="" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="PolistirolPrice" style="width:50px" title="File type" value="1238" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="PolistirolSumm" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+    <td>
+      <input id="PolistirolTotal" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+  </tr>
+  <tr>
+    <td>Клей</td>
+    <td>
+      <input id="Glue" style="width:50px" title="File type" value="" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="GluePrice" style="width:50px" title="File type" value="174" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="GlueSumm" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+    <td>
+      <input id="GlueTotal" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+  </tr>
+  <tr>
+    <td>ШВВП</td>
+    <td>
+      <input id="SHVVP" style="width:50px" title="File type" value="" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="SHVVPPrice" style="width:50px" title="File type" value="29" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="SHVVPSumm" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+    <td>
+      <input id="SHVVPTotal" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+  </tr>
+  <tr>
+    <td>Рама</td>
+    <td>
+      <input id="Frame" style="width:50px" title="File type" value="" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="FramePrice" style="width:50px" title="File type" value="210" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="FrameSumm" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+    <td>
+      <input id="FrameTotal" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+  </tr>
+  <tr>
+    <td>Принт</td>
+    <td>
+      <input id="Print" style="width:50px" title="File type" value="" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="PrintPrice" style="width:50px" title="File type" value="642" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="PrintSumm" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+    <td>
+      <input id="PrintTotal" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+  </tr>
+  <tr>
+    <td>Диоды</td>
+    <td>
+      <input id="Diodes" style="width:50px" title="File type" value="" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="DiodesPrice" style="width:50px" title="File type" value="16.3" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="DiodesSumm" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+    <td>
+      <input id="DiodesTotal" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+  </tr>
+  <tr>
+    <td>Блок питания</td>
+    <td>
+      <input id="PowerUnit" style="width:50px" title="File type" value="" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="PowerUnitPrice" style="width:50px" title="File type" value="1700" onchange="calc()"/>
+    </td>
+    <td>
+      <input id="PowerUnitSumm" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+    <td>
+      <input id="PowerUnitTotal" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+  </tr>
+  <tr>
+    <td>Итого</td>
+    <td>
+      
+    </td>
+    <td>
+      
+    </td>
+    <td>
+      <input id="TotalPrice" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+    <td>
+      <input id="Total" style="width:50px" title="File type" value="" readonly="readonly"/>
+    </td>
+  </tr>
+</table>
+
+<div id="warning" style="visibility:hidden">
+Warning: There are some objects contained within groups that were not selected.
+</div>
+</body>
+</html>
